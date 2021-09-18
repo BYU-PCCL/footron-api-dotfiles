@@ -1,0 +1,6 @@
+[secrets]
+production_url = "example.com"
+staging_url = "staging.example.com"
+internal_whitelist_host = "123.10.5.0/24"
+production_controller_api_url = "prod-ctrl:8000"
+staging_controller_api_url = "staging-ctrl:8000"

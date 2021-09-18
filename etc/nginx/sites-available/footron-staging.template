@@ -1,0 +1,80 @@
+server {
+
+        root /var/www/{{ staging_url }};
+
+        server_name {{ staging_url }};
+	index index.html index.htm index.nginx-debian.html index.php;
+
+	allow all;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+	# TODO: Figure out how not to duplicate these blocks but still deny
+        location /api {
+                proxy_pass              http://localhost:8000/api;
+                proxy_set_header        Host $host;
+                proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header        X-Forwarded-Proto https;
+                proxy_redirect  http://127.0.0.1:8000/api https://{{ staging_url }};
+        }
+
+	location /api/qr {
+                proxy_pass              http://localhost:8000/api/qr;
+                proxy_set_header        Host $host;
+                proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header        X-Forwarded-Proto https;
+                proxy_redirect  http://127.0.0.1:8000/api https://{{ staging_url }};
+		allow                   {{ internal_whitelist_host }};
+		deny                    all;
+	}
+
+        location /messaging {
+                proxy_pass              http://localhost:8000/messaging;
+                proxy_set_header        Upgrade $http_upgrade;
+                proxy_set_header        Connection "Upgrade";
+                proxy_set_header        Host $host;
+                proxy_redirect	http://127.0.0.1:8000/messaging https://{{ staging_url }};
+	}
+
+        location /messaging/out {
+                proxy_pass              http://localhost:8000/messaging/out;
+                proxy_set_header        Upgrade $http_upgrade;
+                proxy_set_header        Connection "Upgrade";
+                proxy_set_header        Host $host;
+                proxy_redirect	http://127.0.0.1:8000/messaging https://{{ staging_url }};
+
+		allow                   {{ internal_whitelist_host }};
+		deny                    all;
+	}
+
+	# location ~ \.php$ {
+        #         include snippets/fastcgi-php.conf;
+        #         fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+	# }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/{{ staging_url }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ staging_url }}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = {{ staging_url }}) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+        server_name {{ staging_url }};
+
+	listen 80;
+        listen [::]:80;
+    return 404; # managed by Certbot
+
+
+}
