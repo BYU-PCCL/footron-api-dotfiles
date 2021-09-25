@@ -40,7 +40,7 @@ TODO: Document how we set and renew Certbot (we use whatever the default Nginx p
 
 Right now the command @vinhowe has been just running in `screen` is:
 ```sh
-FT_LOG_LEVEL=debug FT_BASE_URL=https://{{ production_url }} FT_CONTROLLER_URL=http://{{ production_controller_api_url }} python3 -m uvicorn --ws-ping-interval 5 --ws-ping-timeout 5 footron_api.app:app --host 0.0.0.0
+FT_LOG_LEVEL=debug FT_BASE_URL=https://{{ production_url }} FT_CONTROLLER_URL=http://{{ production_controller_api_url }} python3 -m uvicorn --ws-ping-interval 5 --ws-ping-timeout 5 footron_api.app:app
 ```
 ...but we should be using systemd like we do on the controller.
 
